@@ -1,14 +1,14 @@
-# scripts/ingest_data.py
 from pathlib import Path
 import logging
+import duckdb as duckdb
+import pandas as pd
 import os
 
-# Configure logging
+# Initialize and configure logger
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 logger = logging.getLogger(__name__)
-#Just for git
 
-# Get the project root directory (parent of scripts directory)
+# Script constants
 SCRIPT_DIR = Path(__file__).parent
 PROJECT_DIR = SCRIPT_DIR.parent
 RAW_DIR = PROJECT_DIR / "data" / "raw"
@@ -18,8 +18,21 @@ DUCKDB_PATH = PROJECT_DIR / "nhl.duckdb"
 # Create directories if they don't exist
 BRONZE_DIR.mkdir(parents=True, exist_ok=True)
 
-def csv_to_parquet(file_path: Path):
-    """Convert CSV file to Parquet format with error handling and memory optimization."""
+def csv_to_parquet(file_path: Path) -> Path:
+    """
+    Convert CSV file to Parquet format with error 
+    handling and memory optimization.
+    
+    Args:
+        file_path (Path): Path to the CSV file.
+    Returns:
+        Path: Path to the output Parquet file.
+    Raises:
+        Various exceptions for file reading/writing issues.
+    
+    Author: IFD
+    Date: 2025-10-16
+    """
     try:
         logger.info(f"Processing {file_path.name}")
         
@@ -28,13 +41,17 @@ def csv_to_parquet(file_path: Path):
             logger.error(f"File not found: {file_path}")
             return None
             
+        # If file is empty, log and skip
         if file_path.stat().st_size == 0:
             logger.warning(f"File is empty: {file_path}")
             return None
         
-        # Read CSV in chunks if file is large (>100MB)
+        # Read CSV in chunks if file is large
         file_size = file_path.stat().st_size
-        if file_size > 100 * 1024 * 1024:  # 100MB
+
+        # If file is larger than 100MB, read in chunks
+        # to avoid memory issues
+        if file_size > 100 * 1024 * 1024:
             logger.info(f"Large file detected ({file_size / 1024 / 1024:.1f}MB), reading in chunks")
             chunks = []
             chunk_size = 10000
@@ -50,6 +67,7 @@ def csv_to_parquet(file_path: Path):
             logger.warning(f"DataFrame is empty after reading {file_path}")
             return None
             
+        # Inform basic info about the DataFrame to the user
         logger.info(f"Loaded {len(df)} rows and {len(df.columns)} columns from {file_path.name}")
         
         # Output Parquet path
@@ -72,7 +90,18 @@ def csv_to_parquet(file_path: Path):
         return None
 
 def load_into_duckdb(parquet_path: Path, con):
-    """Load Parquet file into DuckDB with error handling."""
+    """
+    Load Parquet file into DuckDB with error handling.
+    
+    Args:
+        parquet_path (Path): Path to the Parquet file.
+        con: DuckDB connection object.
+    Raises:
+        Various exceptions for database operations.
+    
+    Author: IFD
+    Date: 2025-10-16
+    """
     try:
         table_name = parquet_path.stem
         
@@ -96,7 +125,11 @@ def load_into_duckdb(parquet_path: Path, con):
         raise
 
 def main():
-    """Main ingestion function with comprehensive error handling."""
+    """
+    Main ingestion function with comprehensive error handling.
+    
+    
+    """
     try:
         logger.info("Starting data ingestion process")
         logger.info(f"Raw data directory: {RAW_DIR}")
@@ -108,6 +141,8 @@ def main():
             logger.error(f"Raw data directory does not exist: {RAW_DIR}")
             return
             
+        # Note:
+        # Probably should add for more file types in future (just CSV for now)
         csv_files = list(RAW_DIR.glob("*.csv"))
         if not csv_files:
             logger.warning(f"No CSV files found in {RAW_DIR}")
@@ -129,6 +164,7 @@ def main():
             
             if parquet_path is not None:
                 try:
+                    # Load into DuckDB (bronze schema)
                     load_into_duckdb(parquet_path, con)
                     successful_loads += 1
                 except Exception as e:
@@ -141,7 +177,11 @@ def main():
         # Display summary
         logger.info(f"\n📊 Ingestion Summary:")
         logger.info(f"✅ Successfully processed: {successful_loads} files")
-        logger.info(f"❌ Failed to process: {failed_loads} files")
+        
+        # Only show failed count if there were failures
+        if failed_loads > 0:
+            logger.info(f"❌ Failed to process: {failed_loads} files")
+            
         logger.info(f"📋 Total files: {len(csv_files)}")
         
         # List tables in DuckDB for verification

@@ -1,0 +1,58 @@
+version: 2
+
+sources:
+  - name: bronze
+    description: "Bronze layer tables from NHL data ingestion"
+    schema: bronze
+    tables:
+      - name: goalies
+        description: "NHL goalie statistics and performance data"
+        columns:
+          - name: playerId
+            description: "Unique identifier for the player"
+            tests:
+              - not_null
+          - name: season
+            description: "Season year"
+            tests:
+              - not_null
+          - name: name
+            description: "Player name"
+          - name: team
+            description: "Team abbreviation"
+          - name: position
+            description: "Player position"
+            
+      - name: skaters
+        description: "NHL skater statistics and performance data"
+        columns:
+          - name: playerId
+            description: "Unique identifier for the player"
+            tests:
+              - not_null
+          - name: season
+            description: "Season year"
+            tests:
+              - not_null
+          - name: name
+            description: "Player name"
+          - name: team
+            description: "Team abbreviation"
+          - name: position
+            description: "Player position"
+            
+      - name: teams
+        description: "NHL team information and statistics"
+        columns:
+          - name: season
+            description: "Season year"
+            tests:
+              - not_null
+              
+      - name: lines
+        description: "NHL line combinations and performance data"
+        columns:
+          - name: season
+            description: "Season year"
+            tests:
+              - not_null

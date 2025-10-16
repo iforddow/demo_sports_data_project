@@ -1,0 +1,12 @@
+{{ config(materialized='view') }}
+
+select
+    playerId as player_id,
+    season,
+    name as player_name,
+    team as team_code,
+    position
+from {{ source('bronze', 'goalies') }}
+where playerId is not null
+    and season is not null
+    limit 10

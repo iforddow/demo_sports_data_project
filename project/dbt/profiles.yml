@@ -1,0 +1,21 @@
+nhl_analytics:
+  outputs:
+    dev:
+      type: duckdb
+      path: ../nhl.duckdb
+      schema: silver
+      threads: 4
+      extensions:
+        - httpfs
+        - parquet
+
+    prod:
+      type: duckdb
+      path: ../nhl.duckdb
+      schema: silver
+      threads: 4
+      extensions:
+        - httpfs
+        - parquet
+
+  target: dev
