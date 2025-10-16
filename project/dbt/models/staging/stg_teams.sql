@@ -1,17 +1,17 @@
-{{ config(materialized='view') }}
-
-select
-    season,
+{{ config(materialized = 'view') }}
+select season,
     name as team_name,
     team as team_code,
-    games_played,
-    goalsFor,
-    goalsAgainst,
-    goalsFor - goalsAgainst as goal_differential,
-    xGoalsFor,
-    xGoalsAgainst,
+    sum(games_played) as games_played,
+    sum(goalsFor) as goalsFor,
+    sum(goalsAgainst) as goalsAgainst,
+    sum(goalsFor) - sum(goalsAgainst) as goal_differential,
+    sum(xGoalsFor) as xGoalsFor,
+    sum(xGoalsAgainst) as xGoalsAgainst,
     current_timestamp as loaded_at
 from {{ source('bronze', 'teams') }}
 where season is not null
     and name is not null
-    and situation = 'all'
+group by season,
+    name,
+    team

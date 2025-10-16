@@ -1,4 +1,7 @@
-{{ config(materialized='table') }}
+{{ config(
+    materialized = 'table',
+    post_hook = "{{ export_to_silver('mart_player_performance') }}"
+) }}
 
 select 
     player_id,
@@ -9,7 +12,7 @@ select
     games_played,
     points_per_game,
     shooting_percentage,
-    case 
+    case
         when points_per_game >= 1.0 then 'Elite'
         when points_per_game >= 0.7 then 'Very Good'
         when points_per_game >= 0.5 then 'Good'

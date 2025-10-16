@@ -19,7 +19,10 @@ select
     goal_differential,
     xGoalsFor,
     xGoalsAgainst,
-    row_number() over (order by goalsFor desc, goal_differential desc) as standings_rank,
+    row_number() over (
+        order by goalsFor desc,
+            goal_differential desc
+    ) as standings_rank,
     loaded_at
 from "nhl"."silver"."stg_teams"
 order by standings_rank

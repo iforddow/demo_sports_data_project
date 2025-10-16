@@ -2,4 +2,4 @@ pandas
 pyarrow
 openpyxl
 duckdb
-dbt
+dbt-duckdb
