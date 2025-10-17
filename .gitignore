@@ -1,6 +1,9 @@
 # Large data files
 project/data/raw/*.csv
 project/nhl.duckdb
+project/data/raw/*.xlsx
+project/data/raw/*.xls
+project/data/raw/*.xlsm
 
 # Python
 __pycache__/
